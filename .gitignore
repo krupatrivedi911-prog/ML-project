@@ -32,3 +32,10 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# Antigravity / Agent configs
+.agents/
+.gemini/
+
+# IMPORTANT: Do NOT ignore model/ directory — required for ML predictions
+# model/

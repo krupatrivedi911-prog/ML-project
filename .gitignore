@@ -1,0 +1,34 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments & secrets
+.env
+.venv
+env/
+venv/
+ENV/
+*.key
+*.pem
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Node / Frontend build artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+frontend/dist/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE configurations
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

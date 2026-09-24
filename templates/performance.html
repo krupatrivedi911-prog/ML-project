@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Model Performance & Visualizations | AI-Based Chocolate Paan Sales Prediction{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 3.5rem;">
+  
+  <!-- Header -->
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <div class="hero-badge">📈 Week 5 & Week 6 Official Benchmarks</div>
+    <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">Model Performance & Diagnostics</h1>
+    <p style="color: var(--color-text-muted); max-width: 700px; margin: 0 auto;">
+      Comprehensive benchmarking of 5 machine learning regression architectures evaluated on 
+      2,000 unseen test samples from <code>Chocolate_Paan_Sales_Dataset_10000.xlsx</code>.
+    </p>
+  </div>
+
+  <!-- 1. Model Performance Benchmark Table -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">1. Test Set Performance Comparison Table</h2>
+        <p class="card-subtitle">Evaluated on 20% holdout test partition (2,000 samples, random_state=42).</p>
+      </div>
+      <span class="badge badge-caramel">Selected: Linear Regression (R² = 0.9449)</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Model Algorithm</th>
+            <th>MAE (Boxes Sold)</th>
+            <th>MSE</th>
+            <th>RMSE (Boxes Sold)</th>
+            <th>R² Score</th>
+            <th>Rank</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in metrics %}
+          <tr {% if m.Model == 'Linear Regression' %}class="highlight-row"{% endif %}>
+            <td>
+              <strong>{{ m.Model }}</strong>
+              {% if m.Model == 'Linear Regression' %}
+                <span class="badge badge-caramel" style="margin-left: 0.4rem; font-size: 0.72rem;">★ Production Winner</span>
+              {% endif %}
+            </td>
+            <td><strong>{{ "%.4f"|format(m.MAE) }}</strong></td>
+            <td>{{ "%.4f"|format(m.MSE) }}</td>
+            <td><strong>{{ "%.4f"|format(m.RMSE) }}</strong></td>
+            <td><strong style="color: var(--color-primary); font-size: 1.05rem;">{{ "%.4f"|format(m.R2) }}</strong></td>
+            <td>
+              {% if loop.index == 1 %}🥇 Best Overall
+              {% elif loop.index == 2 %}🥈 2nd Rank
+              {% elif loop.index == 3 %}🥉 3rd Rank
+              {% elif loop.index == 4 %}4th Rank
+              {% else %}5th Rank
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="background: var(--color-surface); padding: 1rem 1.4rem; border-radius: var(--radius-md); font-size: 0.88rem; color: var(--color-secondary);">
+      💡 <strong>Key Takeaway:</strong> <em>Linear Regression</em> achieved the highest test R² (<strong>0.9449</strong>) and lowest error (MAE: <strong>7.71 boxes</strong>, RMSE: <strong>8.93 boxes</strong>). The relationship between business inputs (marketing, pricing, orders) and boxes sold exhibits clear linearity with minimal collinear instability.
+    </div>
+  </div>
+
+  <!-- 2. Generalization & Overfitting Analysis Table -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">2. Generalization & Overfitting Diagnosis</h2>
+        <p class="card-subtitle">Comparing Training R² (8,000 samples) vs Testing R² (2,000 samples).</p>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Model Algorithm</th>
+            <th>Training R²</th>
+            <th>Testing R²</th>
+            <th>Generalization Gap</th>
+            <th>Status Diagnosis</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for g in generalization %}
+          <tr {% if g.Model == 'Linear Regression' %}class="highlight-row"{% endif %}>
+            <td><strong>{{ g.Model }}</strong></td>
+            <td>{{ "%.4f"|format(g['Training R2']) }}</td>
+            <td>{{ "%.4f"|format(g['Testing R2']) }}</td>
+            <td>{{ "%+.4f"|format(g['Generalization Gap']) }}</td>
+            <td>
+              {% if g.Status == 'Strong Generalization' %}
+                <span class="badge badge-success">✓ Strong Generalization</span>
+              {% elif g.Status == 'Noticeable Overfit' %}
+                <span class="badge badge-dark" style="color: #E65100;">⚠ Noticeable Overfit</span>
+              {% else %}
+                <span class="badge badge-dark" style="color: #C62828;">❌ Severe Overfit (Memorized Data)</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 3. Week 6 Visualizations Grid -->
+  <div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
+    <h2 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 0.4rem;">
+      Week 6 Diagnostic & Interpretation Graphs
+    </h2>
+    <p style="color: var(--color-text-muted);">
+      High-resolution visual assets generated directly from model outputs (saved in <code>static/images/</code>).
+    </p>
+  </div>
+
+  <div class="charts-grid">
+    <!-- Graph 1: R2 Comparison -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3 class="chart-title">1. R² Comparison Across Models</h3>
+        <p class="chart-desc">Higher is better. Linear Regression leads with R² = 0.9449.</p>
+      </div>
+      <div class="chart-img-wrapper">
+        <img src="{{ url_for('static', filename='images/r2_comparison.png') }}" 
+             alt="R² Comparison Graph" class="chart-img" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Graph 2: MAE Comparison -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3 class="chart-title">2. Mean Absolute Error (MAE)</h3>
+        <p class="chart-desc">Lower is better. Linear Regression achieves the lowest average deviation (7.71 boxes).</p>
+      </div>
+      <div class="chart-img-wrapper">
+        <img src="{{ url_for('static', filename='images/mae_comparison.png') }}" 
+             alt="MAE Comparison Graph" class="chart-img" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Graph 3: RMSE Comparison -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3 class="chart-title">3. Root Mean Squared Error (RMSE)</h3>
+        <p class="chart-desc">Lower is better. Heavily penalizes large variance outliers.</p>
+      </div>
+      <div class="chart-img-wrapper">
+        <img src="{{ url_for('static', filename='images/rmse_comparison.png') }}" 
+             alt="RMSE Comparison Graph" class="chart-img" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Graph 4: Training vs Testing R2 -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3 class="chart-title">4. Training vs Testing R²</h3>
+        <p class="chart-desc">Decision Tree memorizes training data (1.00) but collapses on test data (0.6174).</p>
+      </div>
+      <div class="chart-img-wrapper">
+        <img src="{{ url_for('static', filename='images/train_vs_test_r2.png') }}" 
+             alt="Training vs Testing R² Comparison" class="chart-img" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Graph 5: Actual vs Predicted -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3 class="chart-title">5. Actual vs Predicted (Selected Model)</h3>
+        <p class="chart-desc">Test observations tightly clustered around the ideal y = x reference line.</p>
+      </div>
+      <div class="chart-img-wrapper">
+        <img src="{{ url_for('static', filename='images/actual_vs_predicted.png') }}" 
+             alt="Actual vs Predicted Boxes Sold" class="chart-img" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Graph 6: Residual Plot -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3 class="chart-title">6. Residual Plot (Actual - Predicted)</h3>
+        <p class="chart-desc">Evenly distributed homoscedastic residuals centered tightly around zero baseline (y = 0).</p>
+      </div>
+      <div class="chart-img-wrapper">
+        <img src="{{ url_for('static', filename='images/residual_plot.png') }}" 
+             alt="Residual Plot" class="chart-img" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Graph 7: LR Coefficients -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3 class="chart-title">7. Linear Regression Feature Coefficients</h3>
+        <p class="chart-desc">Directional impact (+ / -) in boxes per unit increase. Intercept = {{ "%.2f"|format(intercept) }}.</p>
+      </div>
+      <div class="chart-img-wrapper">
+        <img src="{{ url_for('static', filename='images/lr_coefficients.png') }}" 
+             alt="Linear Regression Coefficients" class="chart-img" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Graph 8: RF Feature Importance -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3 class="chart-title">8. Random Forest Feature Importance</h3>
+        <p class="chart-desc">Displayed separately: Mean Decrease Impurity (MDI) % contribution, summing to 100%.</p>
+      </div>
+      <div class="chart-img-wrapper">
+        <img src="{{ url_for('static', filename='images/rf_feature_importance.png') }}" 
+             alt="Random Forest Feature Importance" class="chart-img" loading="lazy">
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 2.5rem;">
+    <a href="{{ url_for('predict') }}" class="btn btn-primary" style="padding: 0.9rem 2.2rem; font-size: 1.05rem;">
+      ⚡ Test Inferences with Selected Model →
+    </a>
+  </div>
+</div>
+{% endblock %}

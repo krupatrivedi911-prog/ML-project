@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}About Project | AI-Based Chocolate Paan Sales Prediction{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 3.5rem;">
+  
+  <div style="text-align: center; margin-bottom: 2.2rem;">
+    <div class="hero-badge">🎓 BTech Machine Learning Project</div>
+    <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">About the Project</h1>
+    <p style="color: var(--color-text-muted); max-width: 680px; margin: 0 auto;">
+      AI-Based Chocolate Paan Sales Prediction System designed to forecast sales volume, optimize inventory, 
+      and assist operational planning.
+    </p>
+  </div>
+
+  <!-- Project Overview Card -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">1. Project Overview & Objective</h2>
+    </div>
+    <p style="margin-bottom: 1rem;">
+      <strong>Project Title:</strong> AI-Based Chocolate Paan Sales Prediction System<br>
+      <strong>Objective:</strong> Predict the continuous target variable <code>Boxes_Sold</code> using 
+      operational business, customer behavioral, social marketing, and external environmental factors.
+    </p>
+    <p style="margin-bottom: 1rem;">
+      Fresh confectioneries like Chocolate Paan suffer from perishable raw ingredients (betel leaves, cocoa fillings, sweet toppings). Underproduction leads to lost revenue and customer dissatisfaction during festive rushes, while overproduction leads to inventory spoilage. This project applies machine learning regression algorithms to accurately predict sales demand.
+    </p>
+    <div style="background: var(--color-surface); padding: 1.1rem 1.4rem; border-radius: var(--radius-md); border-left: 4px solid var(--color-caramel);">
+      <strong>Target Variable:</strong> <code>Boxes_Sold</code> (Continuous integer representing boxes of chocolate paan sold on a given day).
+    </div>
+  </div>
+
+  <!-- Feature Set Description -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">2. Input Feature Space (14 Variables)</h2>
+      <p class="card-subtitle">Dataset: <code>Chocolate_Paan_Sales_Dataset_10000.xlsx</code> (10,000 recorded instances).</p>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Group</th>
+            <th>Feature Name</th>
+            <th>Data Type</th>
+            <th>Business Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="3" style="font-weight: 700; color: var(--color-secondary);">Product & Pricing</td>
+            <td><code>Temperature</code></td>
+            <td>Float</td>
+            <td>Ambient daily temperature (°C). Influences chocolate melting and consumer footfall.</td>
+          </tr>
+          <tr>
+            <td><code>Price</code></td>
+            <td>Float</td>
+            <td>Selling price per box in INR (₹). Governs price elasticity of demand.</td>
+          </tr>
+          <tr>
+            <td><code>Discount_Percentage</code></td>
+            <td>Float</td>
+            <td>Promotional discount offered (0% to 100%). Drives customer volume.</td>
+          </tr>
+
+          <tr>
+            <td rowspan="4" style="font-weight: 700; color: var(--color-secondary);">Marketing Campaigns</td>
+            <td><code>Marketing_Budget</code></td>
+            <td>Float</td>
+            <td>Daily promotional spending in INR (₹) across online & offline ads.</td>
+          </tr>
+          <tr>
+            <td><code>Instagram_Reel</code></td>
+            <td>Integer</td>
+            <td>Number of Instagram Reels published today. Drives viral food discovery.</td>
+          </tr>
+          <tr>
+            <td><code>YouTube_Video</code></td>
+            <td>Integer</td>
+            <td>Number of food review & promo videos uploaded.</td>
+          </tr>
+          <tr>
+            <td><code>Facebook_Ads</code></td>
+            <td>Integer</td>
+            <td>Count of targeted Facebook sponsored ad sets running.</td>
+          </tr>
+
+          <tr>
+            <td rowspan="3" style="font-weight: 700; color: var(--color-secondary);">Customer Behavior</td>
+            <td><code>Returning_Customers</code></td>
+            <td>Integer</td>
+            <td>Loyal customers visiting the store or re-ordering online.</td>
+          </tr>
+          <tr>
+            <td><code>New_Customers</code></td>
+            <td>Integer</td>
+            <td>First-time acquired consumers.</td>
+          </tr>
+          <tr>
+            <td><code>Customer_Rating</code></td>
+            <td>Float</td>
+            <td>Aggregated customer satisfaction rating (1.0 to 5.0 stars).</td>
+          </tr>
+
+          <tr>
+            <td rowspan="2" style="font-weight: 700; color: var(--color-secondary);">Order Distribution</td>
+            <td><code>Online_Orders</code></td>
+            <td>Integer</td>
+            <td>Volume originating via food delivery portals (Zomato, Swiggy, Store App).</td>
+          </tr>
+          <tr>
+            <td><code>Offline_Orders</code></td>
+            <td>Integer</td>
+            <td>Volume originating via counter sales and physical kiosk walk-ins.</td>
+          </tr>
+
+          <tr>
+            <td rowspan="2" style="font-weight: 700; color: var(--color-secondary);">Calendar & Environmental</td>
+            <td><code>Festival</code></td>
+            <td>Binary (0/1)</td>
+            <td>Indicator whether the day coincides with an Indian festival (Diwali, Holi, Eid, etc.).</td>
+          </tr>
+          <tr>
+            <td><code>Weekend</code></td>
+            <td>Binary (0/1)</td>
+            <td>Indicator whether the day is Saturday or Sunday.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Evaluated Models & Metrics -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">3. Machine Learning Models & Evaluation Metrics</h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; margin-bottom: 1.5rem;">
+      <div style="background: var(--color-surface); padding: 1.2rem; border-radius: var(--radius-md);">
+        <h3 style="font-size: 1.05rem; color: var(--color-secondary); margin-bottom: 0.4rem;">Evaluated Models (Week 5)</h3>
+        <ul style="padding-left: 1.2rem; font-size: 0.9rem; color: var(--color-dark);">
+          <li><strong>Linear Regression</strong> (Selected, R² = 0.9449)</li>
+          <li><strong>Gradient Boosting Regressor</strong> (R² = 0.9161)</li>
+          <li><strong>Support Vector Regressor</strong> (RBF Kernel, R² = 0.9001)</li>
+          <li><strong>Random Forest Regressor</strong> (100 trees, R² = 0.8503)</li>
+          <li><strong>Decision Tree Regressor</strong> (R² = 0.6174)</li>
+        </ul>
+      </div>
+
+      <div style="background: var(--color-surface); padding: 1.2rem; border-radius: var(--radius-md);">
+        <h3 style="font-size: 1.05rem; color: var(--color-secondary); margin-bottom: 0.4rem;">Evaluation Metrics</h3>
+        <ul style="padding-left: 1.2rem; font-size: 0.9rem; color: var(--color-dark);">
+          <li><strong>MAE (Mean Absolute Error):</strong> Average magnitude of prediction errors in boxes.</li>
+          <li><strong>MSE (Mean Squared Error):</strong> Average of squared errors.</li>
+          <li><strong>RMSE (Root Mean Squared Error):</strong> Penalizes large individual errors.</li>
+          <li><strong>R² Score (Coefficient of Determination):</strong> Proportion of variance in <code>Boxes_Sold</code> explained by the features.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="background: rgba(217, 154, 61, 0.12); padding: 1.1rem 1.4rem; border-radius: var(--radius-md); border-left: 4px solid var(--color-caramel); font-size: 0.9rem;">
+      🎓 <strong>Key Viva Discussion Point:</strong> <em>Why did Linear Regression outperform Random Forest & Decision Tree?</em><br>
+      The underlying business data shows a strong additive linear structure with well-behaved features. Decision Tree suffered from <strong>overfitting</strong> (Training R² = 1.00 vs Testing R² = 0.6174), because it partitioned feature space into rigid rectangular leaves without pruning. Linear Regression had virtually zero generalization gap (Training R² = 0.9402 vs Testing R² = 0.9449), demonstrating superior real-world reliability.
+    </div>
+  </div>
+
+</div>
+{% endblock %}

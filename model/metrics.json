@@ -1,0 +1,127 @@
+{
+  "features": [
+    "Temperature",
+    "Price",
+    "Discount_Percentage",
+    "Marketing_Budget",
+    "Instagram_Reel",
+    "YouTube_Video",
+    "Facebook_Ads",
+    "Returning_Customers",
+    "New_Customers",
+    "Online_Orders",
+    "Offline_Orders",
+    "Customer_Rating",
+    "Festival",
+    "Weekend"
+  ],
+  "target": "Boxes_Sold",
+  "best_model": "Linear Regression",
+  "intercept": 118.0467,
+  "coefficients": {
+    "Temperature": -0.0068,
+    "Price": -0.8053,
+    "Discount_Percentage": 1.9808,
+    "Marketing_Budget": 0.005,
+    "Instagram_Reel": 18.1488,
+    "YouTube_Video": 14.869,
+    "Facebook_Ads": 9.643,
+    "Returning_Customers": 0.401,
+    "New_Customers": 0.4935,
+    "Online_Orders": 0.3051,
+    "Offline_Orders": 0.2036,
+    "Customer_Rating": 0.2222,
+    "Festival": 60.2768,
+    "Weekend": 25.0976
+  },
+  "rf_importances": {
+    "Temperature": 0.0186,
+    "Price": 0.0821,
+    "Discount_Percentage": 0.1327,
+    "Marketing_Budget": 0.0492,
+    "Instagram_Reel": 0.0414,
+    "YouTube_Video": 0.0244,
+    "Facebook_Ads": 0.0081,
+    "Returning_Customers": 0.1454,
+    "New_Customers": 0.1036,
+    "Online_Orders": 0.0706,
+    "Offline_Orders": 0.0476,
+    "Customer_Rating": 0.0145,
+    "Festival": 0.1721,
+    "Weekend": 0.0896
+  },
+  "metrics": [
+    {
+      "Model": "Linear Regression",
+      "MAE": 7.7102,
+      "MSE": 79.7161,
+      "RMSE": 8.9284,
+      "R2": 0.9449
+    },
+    {
+      "Model": "Decision Tree",
+      "MAE": 18.778,
+      "MSE": 553.47,
+      "RMSE": 23.5259,
+      "R2": 0.6174
+    },
+    {
+      "Model": "Random Forest",
+      "MAE": 11.7753,
+      "MSE": 216.5535,
+      "RMSE": 14.7158,
+      "R2": 0.8503
+    },
+    {
+      "Model": "SVR (RBF Kernel)",
+      "MAE": 9.3598,
+      "MSE": 144.578,
+      "RMSE": 12.0241,
+      "R2": 0.9001
+    },
+    {
+      "Model": "Gradient Boosting",
+      "MAE": 9.0932,
+      "MSE": 121.3074,
+      "RMSE": 11.014,
+      "R2": 0.9161
+    }
+  ],
+  "generalization": [
+    {
+      "Model": "Linear Regression",
+      "Training R2": 0.9402,
+      "Testing R2": 0.9449,
+      "Generalization Gap": -0.0047,
+      "Status": "Strong Generalization"
+    },
+    {
+      "Model": "Decision Tree",
+      "Training R2": 1.0,
+      "Testing R2": 0.6174,
+      "Generalization Gap": 0.3826,
+      "Status": "Severe Overfit"
+    },
+    {
+      "Model": "Random Forest",
+      "Training R2": 0.9782,
+      "Testing R2": 0.8503,
+      "Generalization Gap": 0.1279,
+      "Status": "Noticeable Overfit"
+    },
+    {
+      "Model": "SVR (RBF Kernel)",
+      "Training R2": 0.8971,
+      "Testing R2": 0.9001,
+      "Generalization Gap": -0.003,
+      "Status": "Strong Generalization"
+    },
+    {
+      "Model": "Gradient Boosting",
+      "Training R2": 0.9272,
+      "Testing R2": 0.9161,
+      "Generalization Gap": 0.011,
+      "Status": "Strong Generalization"
+    }
+  ]
+}

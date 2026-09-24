@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction Result | AI-Based Chocolate Paan Sales Prediction{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 3.5rem;">
+  
+  <!-- Result Hero Section -->
+  <div class="result-hero">
+    <div class="result-subtitle">✨ Real Machine Learning Forecast Result</div>
+    <h1 style="color: #FFFFFF; font-size: 2.2rem; margin-bottom: 0.5rem;">Predicted Chocolate Paan Sales</h1>
+    
+    <div class="result-number">
+      {{ predicted_boxes }} <span>Boxes</span>
+    </div>
+    
+    <p style="color: rgba(255, 248, 240, 0.85); font-size: 1.05rem;">
+      Calculated by <strong>{{ model_used }}</strong> (Raw Inference: {{ raw_pred }} boxes)
+    </p>
+
+    <div class="result-badges">
+      <span class="badge badge-caramel">⭐ Model: {{ model_used }}</span>
+      <span class="badge badge-dark">🕒 Inferred at: {{ timestamp }}</span>
+      <span class="badge badge-success">🎯 Benchmark R²: 0.9449</span>
+    </div>
+  </div>
+
+  <!-- Operational & Inventory Recommendation Card -->
+  <div class="card" style="border-left: 5px solid var(--color-caramel);">
+    <h2 style="font-size: 1.25rem; color: var(--color-primary); margin-bottom: 0.6rem;">
+      📦 Operational & Inventory Recommendation
+    </h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+      <div style="background: var(--color-surface); padding: 1rem; border-radius: var(--radius-md);">
+        <div style="font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase;">Paan Leaves Required</div>
+        <div style="font-size: 1.4rem; font-weight: 800; color: var(--color-secondary);">
+          ~{{ predicted_boxes * 4 }} leaves
+        </div>
+        <div style="font-size: 0.75rem; color: var(--color-text-muted);">(Assumes 4 paans per box)</div>
+      </div>
+
+      <div style="background: var(--color-surface); padding: 1rem; border-radius: var(--radius-md);">
+        <div style="font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase;">Chocolate Compound</div>
+        <div style="font-size: 1.4rem; font-weight: 800; color: var(--color-secondary);">
+          ~{{ (predicted_boxes * 0.12)|round(1) }} kg
+        </div>
+        <div style="font-size: 0.75rem; color: var(--color-text-muted);">(Assumes 30g chocolate / box)</div>
+      </div>
+
+      <div style="background: var(--color-surface); padding: 1rem; border-radius: var(--radius-md);">
+        <div style="font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase;">Estimated Gross Revenue</div>
+        <div style="font-size: 1.4rem; font-weight: 800; color: var(--color-caramel);">
+          ₹{{ (predicted_boxes * inputs.Price)|round(0)|int }}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--color-text-muted);">(At ₹{{ inputs.Price }}/box)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary of Inputs Used for This Prediction -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Inference Inputs Parameter Summary</h2>
+        <p class="card-subtitle">Exact 14 features fed into the pre-trained regression pipeline.</p>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Feature Variable</th>
+            <th>Value Entered</th>
+            <th>Unit / Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="3" style="font-weight: 700; color: var(--color-secondary);">Product & Pricing</td>
+            <td><code>Temperature</code></td>
+            <td><strong>{{ inputs.Temperature }}</strong></td>
+            <td>°C (Ambient Temperature)</td>
+          </tr>
+          <tr>
+            <td><code>Price</code></td>
+            <td><strong>₹{{ inputs.Price }}</strong></td>
+            <td>Selling Price per Box</td>
+          </tr>
+          <tr>
+            <td><code>Discount_Percentage</code></td>
+            <td><strong>{{ inputs.Discount_Percentage }}%</strong></td>
+            <td>Promotional Discount Offered</td>
+          </tr>
+
+          <tr>
+            <td rowspan="4" style="font-weight: 700; color: var(--color-secondary);">Marketing</td>
+            <td><code>Marketing_Budget</code></td>
+            <td><strong>₹{{ inputs.Marketing_Budget }}</strong></td>
+            <td>Daily Promotional Spend</td>
+          </tr>
+          <tr>
+            <td><code>Instagram_Reel</code></td>
+            <td><strong>{{ inputs.Instagram_Reel }}</strong></td>
+            <td>Reels Published Today</td>
+          </tr>
+          <tr>
+            <td><code>YouTube_Video</code></td>
+            <td><strong>{{ inputs.YouTube_Video }}</strong></td>
+            <td>YouTube Content Uploads</td>
+          </tr>
+          <tr>
+            <td><code>Facebook_Ads</code></td>
+            <td><strong>{{ inputs.Facebook_Ads }}</strong></td>
+            <td>Active Facebook Ad Sets</td>
+          </tr>
+
+          <tr>
+            <td rowspan="3" style="font-weight: 700; color: var(--color-secondary);">Customers</td>
+            <td><code>Returning_Customers</code></td>
+            <td><strong>{{ inputs.Returning_Customers }}</strong></td>
+            <td>Repeat Footfall / Orders</td>
+          </tr>
+          <tr>
+            <td><code>New_Customers</code></td>
+            <td><strong>{{ inputs.New_Customers }}</strong></td>
+            <td>First-Time Visitors</td>
+          </tr>
+          <tr>
+            <td><code>Customer_Rating</code></td>
+            <td><strong>{{ inputs.Customer_Rating }} ⭐</strong></td>
+            <td>Overall Quality Score (1-5)</td>
+          </tr>
+
+          <tr>
+            <td rowspan="2" style="font-weight: 700; color: var(--color-secondary);">Channels</td>
+            <td><code>Online_Orders</code></td>
+            <td><strong>{{ inputs.Online_Orders }}</strong></td>
+            <td>Zomato / Swiggy / App Count</td>
+          </tr>
+          <tr>
+            <td><code>Offline_Orders</code></td>
+            <td><strong>{{ inputs.Offline_Orders }}</strong></td>
+            <td>Direct Counter Sales Count</td>
+          </tr>
+
+          <tr>
+            <td rowspan="2" style="font-weight: 700; color: var(--color-secondary);">Environment</td>
+            <td><code>Festival</code></td>
+            <td>
+              {% if inputs.Festival == 1 %}
+                <span class="badge badge-success">Yes (Festival Day)</span>
+              {% else %}
+                <span class="badge badge-dark">No (Regular Day)</span>
+              {% endif %}
+            </td>
+            <td>Seasonal Demand Surge Factor</td>
+          </tr>
+          <tr>
+            <td><code>Weekend</code></td>
+            <td>
+              {% if inputs.Weekend == 1 %}
+                <span class="badge badge-success">Yes (Saturday / Sunday)</span>
+              {% else %}
+                <span class="badge badge-dark">No (Weekday)</span>
+              {% endif %}
+            </td>
+            <td>Leisure Footfall Factor</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem;">
+      <a href="{{ url_for('predict') }}" class="btn btn-primary" style="padding: 0.9rem 2.2rem; font-size: 1.05rem;">
+        🔄 New Prediction
+      </a>
+      <a href="{{ url_for('index') }}" class="btn btn-secondary">
+        🏠 Dashboard
+      </a>
+      <a href="{{ url_for('performance') }}" class="btn btn-outline">
+        📊 View Benchmark Graphs
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

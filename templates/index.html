@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | AI-Based Chocolate Paan Sales Prediction{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-badge">✨ Machine Learning Powered Sales Intelligence</div>
+    <h1 class="hero-title">AI-Based Chocolate Paan Sales Prediction</h1>
+    <p class="hero-subtitle">
+      Predict expected chocolate paan sales using machine learning. Analyze product pricing, 
+      marketing campaign impacts, customer behavior, and environmental factors.
+    </p>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a href="{{ url_for('predict') }}" class="btn btn-primary">🚀 Launch Prediction Engine</a>
+      <a href="{{ url_for('performance') }}" class="btn btn-secondary">📊 View Model Benchmarks</a>
+    </div>
+  </section>
+
+  <!-- Metric Stat Cards -->
+  <div class="stats-grid">
+    <!-- Card 1: Models Used -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Models Evaluated</span>
+        <span class="stat-icon">🤖</span>
+      </div>
+      <div class="stat-value">{{ models_count }} Models</div>
+      <div class="stat-desc">LR, Gradient Boosting, SVR, RF, DT</div>
+    </div>
+
+    <!-- Card 2: Latest Prediction -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Latest Prediction</span>
+        <span class="stat-icon">📦</span>
+      </div>
+      <div class="stat-value">{{ latest_prediction }} <span style="font-size: 1.1rem; color: var(--color-caramel);">Boxes</span></div>
+      <div class="stat-desc">From recent session inference</div>
+    </div>
+
+    <!-- Card 3: R² Score -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Production Model R²</span>
+        <span class="stat-icon">🎯</span>
+      </div>
+      <div class="stat-value">{{ "%.4f"|format(best_r2) }}</div>
+      <div class="stat-desc">94.49% Sales Variance Explained</div>
+    </div>
+
+    <!-- Card 4: Total Predictions -->
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Total Predictions</span>
+        <span class="stat-icon">📈</span>
+      </div>
+      <div class="stat-value">{{ total_predictions }}</div>
+      <div class="stat-desc">Total inferences recorded</div>
+    </div>
+  </div>
+
+  <!-- Quick Model Benchmark Overview -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Week 5 Benchmark Overview (Test Set: 2,000 Samples)</h2>
+        <p class="card-subtitle">Official test results from scikit-learn benchmarking across 5 distinct algorithms.</p>
+      </div>
+      <a href="{{ url_for('performance') }}" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View Graphs & Insights →</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Model Algorithm</th>
+            <th>MAE (Boxes)</th>
+            <th>MSE</th>
+            <th>RMSE (Boxes)</th>
+            <th>R² Score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in metrics %}
+          <tr {% if m.Model == 'Linear Regression' %}class="highlight-row"{% endif %}>
+            <td>
+              <strong>{{ m.Model }}</strong>
+              {% if m.Model == 'Linear Regression' %}
+                <span class="badge badge-caramel" style="margin-left: 0.5rem; font-size: 0.7rem;">⭐ Selected Model</span>
+              {% endif %}
+            </td>
+            <td>{{ "%.2f"|format(m.MAE) }}</td>
+            <td>{{ "%.2f"|format(m.MSE) }}</td>
+            <td>{{ "%.2f"|format(m.RMSE) }}</td>
+            <td><strong>{{ "%.4f"|format(m.R2) }}</strong></td>
+            <td>
+              {% if m.R2 >= 0.90 %}
+                <span class="badge badge-success">High Accuracy</span>
+              {% elif m.R2 >= 0.70 %}
+                <span class="badge badge-dark">Moderate</span>
+              {% else %}
+                <span class="badge badge-dark" style="color: #D32F2F;">Overfitting</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent Prediction Activity -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Recent Session Inferences</h2>
+        <p class="card-subtitle">Real-time predictions calculated using the trained scikit-learn model.</p>
+      </div>
+      <a href="{{ url_for('predict') }}" class="btn btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">+ New Prediction</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Timestamp</th>
+            <th>Model</th>
+            <th>Temperature</th>
+            <th>Price</th>
+            <th>Discount</th>
+            <th>Marketing</th>
+            <th>Predicted Boxes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in history %}
+          <tr>
+            <td><code>{{ h.id }}</code></td>
+            <td>{{ h.timestamp }}</td>
+            <td>{{ h.model }}</td>
+            <td>{{ h.temperature }}°C</td>
+            <td>₹{{ h.price }}</td>
+            <td>{{ h.discount_percentage }}%</td>
+            <td>₹{{ h.marketing_budget }}</td>
+            <td><strong style="color: var(--color-caramel); font-size: 1.05rem;">{{ h.predicted_boxes }} Boxes</strong></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

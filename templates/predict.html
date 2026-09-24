@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Predict Sales | AI-Based Chocolate Paan Sales Prediction{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <div class="hero-badge">⚡ Real-Time ML Inference Engine</div>
+    <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">Predict Chocolate Paan Sales</h1>
+    <p style="color: var(--color-text-muted); max-width: 650px; margin: 0 auto;">
+      Enter the 14 operational, customer, marketing, and environmental parameters below to compute 
+      expected sales volume in boxes.
+    </p>
+  </div>
+
+  <!-- Scenario Quick-Fill Presets -->
+  <div class="card" style="padding: 1.2rem 1.6rem; margin-bottom: 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem;">
+      <span style="font-size: 0.88rem; font-weight: 700; color: var(--color-secondary);">
+        💡 Quick Scenario Presets (For Viva & Testing):
+      </span>
+      <div class="scenario-presets" style="margin-bottom: 0;">
+        <button type="button" class="btn-preset" data-scenario="normal">☕ Regular Weekday</button>
+        <button type="button" class="btn-preset" data-scenario="festival_peak">🎉 Festival Weekend Peak</button>
+        <button type="button" class="btn-preset" data-scenario="marketing_boost">🚀 Marketing Campaign Boost</button>
+        <button type="button" class="btn-preset" data-scenario="clear" style="color: var(--color-danger);">✖ Clear Form</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Prediction Form -->
+  <div class="card">
+    <form id="predictionForm" method="POST" action="{{ url_for('predict') }}">
+      
+      <!-- Section 1: Product & Pricing -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span>🏷️</span> 1. Product & Pricing
+        </div>
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label class="form-label" for="Temperature">
+              Temperature (°C)
+              <span class="form-hint">-20°C to 60°C</span>
+            </label>
+            <input type="number" step="0.1" name="Temperature" id="Temperature" class="form-control" 
+                   value="{{ form_data.get('Temperature', '28.5') }}" placeholder="e.g. 28.5" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="Price">
+              Price (₹)
+              <span class="form-hint">Must be > ₹0</span>
+            </label>
+            <input type="number" step="0.5" name="Price" id="Price" class="form-control" 
+                   value="{{ form_data.get('Price', '120.0') }}" placeholder="e.g. 120" min="1" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="Discount_Percentage">
+              Discount Percentage (%)
+              <span class="form-hint">0% to 100%</span>
+            </label>
+            <input type="number" step="0.5" name="Discount_Percentage" id="Discount_Percentage" class="form-control" 
+                   value="{{ form_data.get('Discount_Percentage', '10.0') }}" placeholder="e.g. 10.0" min="0" max="100" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Marketing & Advertising -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span>📢</span> 2. Marketing & Promotions
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="Marketing_Budget">
+              Marketing Budget (₹)
+              <span class="form-hint">Daily ad spend (>= 0)</span>
+            </label>
+            <input type="number" step="10" name="Marketing_Budget" id="Marketing_Budget" class="form-control" 
+                   value="{{ form_data.get('Marketing_Budget', '500') }}" placeholder="e.g. 500" min="0" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="Instagram_Reel">
+              Instagram Reels Published
+              <span class="form-hint">Count per day (0-500)</span>
+            </label>
+            <input type="number" name="Instagram_Reel" id="Instagram_Reel" class="form-control" 
+                   value="{{ form_data.get('Instagram_Reel', '1') }}" placeholder="e.g. 1" min="0" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="YouTube_Video">
+              YouTube Videos Published
+              <span class="form-hint">Count per day (0-500)</span>
+            </label>
+            <input type="number" name="YouTube_Video" id="YouTube_Video" class="form-control" 
+                   value="{{ form_data.get('YouTube_Video', '0') }}" placeholder="e.g. 0" min="0" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="Facebook_Ads">
+              Facebook Ads Running
+              <span class="form-hint">Active campaigns (0-500)</span>
+            </label>
+            <input type="number" name="Facebook_Ads" id="Facebook_Ads" class="form-control" 
+                   value="{{ form_data.get('Facebook_Ads', '1') }}" placeholder="e.g. 1" min="0" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Customer Behavior & Feedback -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span>👥</span> 3. Customers & Feedback
+        </div>
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label class="form-label" for="Returning_Customers">
+              Returning Customers
+              <span class="form-hint">Count (>= 0)</span>
+            </label>
+            <input type="number" name="Returning_Customers" id="Returning_Customers" class="form-control" 
+                   value="{{ form_data.get('Returning_Customers', '45') }}" placeholder="e.g. 45" min="0" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="New_Customers">
+              New Customers
+              <span class="form-hint">Count (>= 0)</span>
+            </label>
+            <input type="number" name="New_Customers" id="New_Customers" class="form-control" 
+                   value="{{ form_data.get('New_Customers', '25') }}" placeholder="e.g. 25" min="0" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="Customer_Rating">
+              Customer Rating
+              <span class="form-hint">1.0 to 5.0 Stars</span>
+            </label>
+            <input type="number" step="0.1" name="Customer_Rating" id="Customer_Rating" class="form-control" 
+                   value="{{ form_data.get('Customer_Rating', '4.3') }}" placeholder="e.g. 4.3" min="1.0" max="5.0" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Channel Orders -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span>🛍️</span> 4. Order Channels
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="Online_Orders">
+              Online Orders
+              <span class="form-hint">Count (Zomato / Swiggy / App)</span>
+            </label>
+            <input type="number" name="Online_Orders" id="Online_Orders" class="form-control" 
+                   value="{{ form_data.get('Online_Orders', '30') }}" placeholder="e.g. 30" min="0" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="Offline_Orders">
+              Offline Orders
+              <span class="form-hint">Count (Dine-in / Takeaway)</span>
+            </label>
+            <input type="number" name="Offline_Orders" id="Offline_Orders" class="form-control" 
+                   value="{{ form_data.get('Offline_Orders', '40') }}" placeholder="e.g. 40" min="0" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Environmental & Calendar Factors -->
+      <div class="form-section">
+        <div class="form-section-title">
+          <span>📅</span> 5. Environmental Factors
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="Festival">
+              Festival Day?
+              <span class="form-hint">Holi / Diwali / Eid / Christmas</span>
+            </label>
+            <select name="Festival" id="Festival" class="form-control" required>
+              <option value="0" {% if form_data.get('Festival') in ['0', 0] %}selected{% endif %}>No (Regular Day)</option>
+              <option value="1" {% if form_data.get('Festival') in ['1', 1] %}selected{% endif %}>Yes (Festival Occasion)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="Weekend">
+              Weekend?
+              <span class="form-hint">Saturday or Sunday</span>
+            </label>
+            <select name="Weekend" id="Weekend" class="form-control" required>
+              <option value="0" {% if form_data.get('Weekend') in ['0', 0] %}selected{% endif %}>No (Weekday Mon-Fri)</option>
+              <option value="1" {% if form_data.get('Weekend') in ['1', 1] %}selected{% endif %}>Yes (Saturday / Sunday)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Model Selection -->
+      <div class="form-group" style="margin-bottom: 2rem;">
+        <label class="form-label" for="model_choice">
+          Model Engine
+          <span class="form-hint">Select trained regression algorithm</span>
+        </label>
+        <select name="model_choice" id="model_choice" class="form-control">
+          {% for m in all_models %}
+            <option value="{{ m }}" {% if m == best_model %}selected{% endif %}>
+              {{ m }} {% if m == best_model %}(★ Recommended — R² = 0.9449){% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Predict Button -->
+      <button type="submit" id="predictSubmitBtn" class="btn btn-primary btn-block" style="font-size: 1.15rem; padding: 1rem;">
+        <span>🎯 Predict Sales</span>
+      </button>
+
+      <!-- Loading State Indicator -->
+      <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <span>Predicting Sales with trained scikit-learn model...</span>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

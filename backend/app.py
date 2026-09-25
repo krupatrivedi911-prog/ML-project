@@ -230,7 +230,7 @@ def predict():
             best_model=BEST_MODEL_NAME,
             all_models=list(all_models.keys()),
             form_data=source_data
-  CD       ), 400
+        ), 400
 
     model_choice = source_data.get('model_choice', BEST_MODEL_NAME)
     predicted_boxes, model_used, raw_pred = execute_prediction(cleaned_data, model_choice)

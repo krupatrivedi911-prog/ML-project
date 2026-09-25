@@ -106,6 +106,12 @@ def validate_inputs(form_data):
     - Festival and Weekend in {0, 1}
     Returns (cleaned_dict, error_message)
     """
+    if form_data is None:
+        return None, "No input data received. Please provide all 14 feature values."
+
+    if hasattr(form_data, 'to_dict'):
+        form_data = form_data.to_dict(flat=True)
+
     cleaned = {}
 
     specs = {
@@ -161,6 +167,9 @@ def execute_prediction(cleaned_data, model_choice=None):
     Executes prediction using the existing trained model.
     Applies exact scaler preprocessing if SVR is selected.
     """
+    if primary_model is None and not all_models:
+        raise RuntimeError("No trained model artifacts were loaded. Check that model/trained_model.pkl and model/all_models.pkl exist and are readable.")
+
     selected_name = model_choice if (model_choice and model_choice in all_models) else BEST_MODEL_NAME
     input_df = pd.DataFrame([cleaned_data])[FEATURES]
 
@@ -171,7 +180,12 @@ def execute_prediction(cleaned_data, model_choice=None):
         model_obj = primary_model
         use_scaled = False
 
+    if model_obj is None:
+        raise RuntimeError(f"Model '{selected_name}' is unavailable in the current deployment environment.")
+
     if use_scaled:
+        if scaler is None:
+            raise RuntimeError("Scaler is missing for the selected model. Check deployment artifacts.")
         input_matrix = scaler.transform(input_df)
         raw_pred = model_obj.predict(input_matrix)[0]
     else:
@@ -217,56 +231,70 @@ def predict():
         )
 
     is_json = request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-    source_data = request.get_json(silent=True) if request.is_json else request.form
+    source_data = request.get_json(silent=True) if request.is_json else request.form.to_dict(flat=True)
 
-    cleaned_data, error = validate_inputs(source_data)
-    if error:
+    try:
+        cleaned_data, error = validate_inputs(source_data)
+        if error:
+            if is_json:
+                return jsonify({'success': False, 'error': error}), 400
+            flash(error, 'danger')
+            return render_template(
+                'predict.html',
+                features=FEATURES,
+                best_model=BEST_MODEL_NAME,
+                all_models=list(all_models.keys()),
+                form_data=source_data
+            ), 400
+
+        model_choice = source_data.get('model_choice', BEST_MODEL_NAME) if isinstance(source_data, dict) else BEST_MODEL_NAME
+        predicted_boxes, model_used, raw_pred = execute_prediction(cleaned_data, model_choice)
+
+        record = {
+            'id': f"PRED-{len(PREDICTION_HISTORY)+1:03d}",
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'model': model_used,
+            'temperature': cleaned_data['Temperature'],
+            'price': cleaned_data['Price'],
+            'discount_percentage': cleaned_data['Discount_Percentage'],
+            'marketing_budget': cleaned_data['Marketing_Budget'],
+            'predicted_boxes': predicted_boxes,
+            'raw_prediction': round(raw_pred, 2)
+        }
+        PREDICTION_HISTORY.insert(0, record)
+
         if is_json:
-            return jsonify({'success': False, 'error': error}), 400
-        flash(error, 'danger')
+            return jsonify({
+                'success': True,
+                'predicted_boxes': predicted_boxes,
+                'model_used': model_used,
+                'timestamp': record['timestamp'],
+                'inputs': cleaned_data,
+                'raw_prediction': round(raw_pred, 2)
+            })
+
+        return render_template(
+            'result.html',
+            predicted_boxes=predicted_boxes,
+            model_used=model_used,
+            timestamp=record['timestamp'],
+            inputs=cleaned_data,
+            raw_pred=round(raw_pred, 2),
+            best_r2=METRICS_DATA['metrics'][0]['R2']
+        )
+    except Exception as e:
+        print(f"[PREDICTION ERROR] {e}")
+        traceback.print_exc()
+        if is_json:
+            return jsonify({'success': False, 'error': f'Prediction failed: {e}'}), 500
+        flash(f'Prediction failed: {e}', 'danger')
         return render_template(
             'predict.html',
             features=FEATURES,
             best_model=BEST_MODEL_NAME,
             all_models=list(all_models.keys()),
-            form_data=source_data
-        ), 400
-
-    model_choice = source_data.get('model_choice', BEST_MODEL_NAME)
-    predicted_boxes, model_used, raw_pred = execute_prediction(cleaned_data, model_choice)
-
-    record = {
-        'id': f"PRED-{len(PREDICTION_HISTORY)+1:03d}",
-        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'model': model_used,
-        'temperature': cleaned_data['Temperature'],
-        'price': cleaned_data['Price'],
-        'discount_percentage': cleaned_data['Discount_Percentage'],
-        'marketing_budget': cleaned_data['Marketing_Budget'],
-        'predicted_boxes': predicted_boxes,
-        'raw_prediction': round(raw_pred, 2)
-    }
-    PREDICTION_HISTORY.insert(0, record)
-
-    if is_json:
-        return jsonify({
-            'success': True,
-            'predicted_boxes': predicted_boxes,
-            'model_used': model_used,
-            'timestamp': record['timestamp'],
-            'inputs': cleaned_data,
-            'raw_prediction': round(raw_pred, 2)
-        })
-
-    return render_template(
-        'result.html',
-        predicted_boxes=predicted_boxes,
-        model_used=model_used,
-        timestamp=record['timestamp'],
-        inputs=cleaned_data,
-        raw_pred=round(raw_pred, 2),
-        best_r2=METRICS_DATA['metrics'][0]['R2']
-    )
+            form_data=source_data or {}
+        ), 500
 
 @app.route('/performance')
 def performance():
@@ -314,12 +342,12 @@ def api_predict():
         }), 503
 
     try:
-        data = request.get_json(silent=True) or request.form
+        data = request.get_json(silent=True) or request.form.to_dict(flat=True) or {}
         cleaned, error = validate_inputs(data)
         if error:
             return jsonify({'success': False, 'error': error}), 400
 
-        model_choice = data.get('model_choice', BEST_MODEL_NAME)
+        model_choice = data.get('model_choice', BEST_MODEL_NAME) if isinstance(data, dict) else BEST_MODEL_NAME
         predicted_boxes, model_used, raw_pred = execute_prediction(cleaned, model_choice)
 
         return jsonify({
@@ -334,7 +362,7 @@ def api_predict():
         traceback.print_exc()
         return jsonify({
             'success': False,
-            'error': 'An unexpected error occurred during prediction. Please try again.'
+            'error': f'Prediction failed: {e}'
         }), 500
 
 @app.route('/api/metrics', methods=['GET'])
@@ -363,6 +391,7 @@ def page_not_found(e):
 
 @app.errorhandler(500)
 def internal_server_error(e):
+    app.logger.exception("Unhandled server error on %s", request.path)
     return render_template('base.html', page_content="<div class='container text-center py-5'><h2>500 - Server Error</h2><p>An unexpected error occurred during prediction inference.</p><a href='/' class='btn btn-primary'>Return to Dashboard</a></div>"), 500
 
 if __name__ == '__main__':

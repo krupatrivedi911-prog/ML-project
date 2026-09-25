@@ -230,10 +230,9 @@ export function classifyDemand(boxes) {
 // ----------------------------------------------------------------------------
 export async function predictSales(features) {
   try {
-    const apiUrl = typeof window !== 'undefined' && window.location.port !== '5173'
-      ? `${window.location.origin}/api/predict`
-      : 'http://127.0.0.1:5000/api/predict';
-    const response = await fetch(apiUrl, {
+    // In dev mode, Vite proxy forwards /api/* to Flask (port 5000).
+    // In production, Flask serves the app directly, so /api/predict works as-is.
+    const response = await fetch('/api/predict', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -243,9 +242,9 @@ export async function predictSales(features) {
         Price: Number(features.Price || 0),
         Discount_Percentage: Number(features.Discount_Percentage || 0),
         Marketing_Budget: Number(features.Marketing_Budget || 0),
-        Instagram_Reel: Number(features.Instagram_Reel || 0),
-        YouTube_Video: Number(features.YouTube_Video || 0),
-        Facebook_Ads: Number(features.Facebook_Ads || 0),
+        Instagram_Reel: features.Instagram_Reel ? 1 : 0,
+        YouTube_Video: features.YouTube_Video ? 1 : 0,
+        Facebook_Ads: features.Facebook_Ads ? 1 : 0,
         Returning_Customers: Number(features.Returning_Customers || 0),
         New_Customers: Number(features.New_Customers || 0),
         Online_Orders: Number(features.Online_Orders || 0),
@@ -262,8 +261,12 @@ export async function predictSales(features) {
         return data.predicted_boxes;
       }
     }
+
+    // If backend returned an error response, try to parse it
+    const errorData = await response.json().catch(() => null);
+    console.warn('Backend returned error:', errorData?.error || response.statusText);
   } catch (err) {
-    console.warn('Flask backend /api/predict not reachable, calculating with local exact regression parameters:', err);
+    console.warn('Flask backend /api/predict not reachable, using local regression fallback:', err.message);
   }
 
   // Fallback: exact trained formula

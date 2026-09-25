@@ -8,16 +8,17 @@ import os
 import json
 import traceback
 from datetime import datetime
+from pathlib import Path
 import joblib
 import pandas as pd
 import numpy as np
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_cors import CORS
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.dirname(BASE_DIR)
+BASE_DIR = Path(__file__).resolve().parent
+ROOT_DIR = BASE_DIR.parent
 
-app = Flask(__name__, template_folder=os.path.join(ROOT_DIR, 'templates'), static_folder=os.path.join(ROOT_DIR, 'static'))
+app = Flask(__name__, template_folder=str(ROOT_DIR / 'templates'), static_folder=str(ROOT_DIR / 'static'))
 
 # Enable CORS for API routes — allows the React dev server (port 5173) to reach Flask (port 5000)
 CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}})
@@ -26,23 +27,30 @@ app.secret_key = os.environ.get('SECRET_KEY', 'chocolate-paan-secret-key-2026')
 # -----------------------------------------------------------------------------
 # Base Directories & Artifact Loading
 # -----------------------------------------------------------------------------
-MODEL_DIR = os.path.join(ROOT_DIR, 'model')
+MODEL_DIR = (ROOT_DIR / 'model').resolve()
+if not MODEL_DIR.exists():
+    MODEL_DIR = (Path.cwd() / 'model').resolve()
 
 # Load Week 5 Trained Model & Preprocessing Pipeline
-MODEL_PATH = os.path.join(MODEL_DIR, 'trained_model.pkl')
-SCALER_PATH = os.path.join(MODEL_DIR, 'scaler.pkl')
-ALL_MODELS_PATH = os.path.join(MODEL_DIR, 'all_models.pkl')
-METRICS_PATH = os.path.join(MODEL_DIR, 'metrics.json')
+MODEL_PATH = (MODEL_DIR / 'trained_model.pkl').resolve()
+SCALER_PATH = (MODEL_DIR / 'scaler.pkl').resolve()
+ALL_MODELS_PATH = (MODEL_DIR / 'all_models.pkl').resolve()
+METRICS_PATH = (MODEL_DIR / 'metrics.json').resolve()
 
 # Load artifacts safely at startup (never retrain during requests)
 print("[FLASK STARTUP] Loading trained models and preprocessing artifacts...")
+print(f"[FLASK STARTUP] Current working directory: {Path.cwd()}")
+print(f"[FLASK STARTUP] Project root: {ROOT_DIR}")
+print(f"[FLASK STARTUP] Model directory: {MODEL_DIR}")
+for artifact_path in (MODEL_PATH, SCALER_PATH, ALL_MODELS_PATH, METRICS_PATH):
+    print(f"[FLASK STARTUP] {artifact_path.name}: exists={artifact_path.exists()}")
 
 try:
-    primary_model = joblib.load(MODEL_PATH)
-    scaler = joblib.load(SCALER_PATH)
-    all_models = joblib.load(ALL_MODELS_PATH) if os.path.exists(ALL_MODELS_PATH) else {}
+    primary_model = joblib.load(str(MODEL_PATH))
+    scaler = joblib.load(str(SCALER_PATH))
+    all_models = joblib.load(str(ALL_MODELS_PATH)) if ALL_MODELS_PATH.exists() else {}
 
-    with open(METRICS_PATH, 'r') as f:
+    with open(str(METRICS_PATH), 'r') as f:
         METRICS_DATA = json.load(f)
 
     FEATURES = METRICS_DATA['features']
@@ -57,6 +65,7 @@ except Exception as e:
     MODEL_LOADED = False
     print(f"[FLASK STARTUP ERROR] Could not load model files: {e}")
     traceback.print_exc()
+    print(f"[FLASK STARTUP ERROR] Checked paths: {MODEL_PATH}, {SCALER_PATH}, {ALL_MODELS_PATH}, {METRICS_PATH}")
     primary_model = None
     scaler = None
     all_models = {}
